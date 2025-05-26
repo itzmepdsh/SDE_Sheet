@@ -196,3 +196,123 @@ public:
         return res;
     }
 };
+
+//Number of subarrays with exactly k unique integers
+class Solution {
+public:
+    long long findSubarrayswithAtmostK(vector<int>& nums, int k){
+        int n = nums.size();
+        long long cnt = 0;
+        int i=0,j=0;
+        int distinct = 0;
+        unordered_map<int,int> mp;
+        while(j<n){
+            mp[nums[j]]++;
+            if(mp[nums[j]] == 1)
+                distinct++;
+            while(distinct > k){
+                mp[nums[i]]--;
+                if(mp[nums[i]] == 0)
+                    distinct--;
+                i++;
+            }
+            cnt += j-i+1;
+            j++;
+        }
+        return cnt;
+    }
+    int subarraysWithKDistinct(vector<int>& nums, int k) {
+        long long atmostk = findSubarrayswithAtmostK(nums,k);
+        long long atmostk_1 = findSubarrayswithAtmostK(nums,k-1);
+        return (int)(atmostk-atmostk_1);
+    }
+};
+
+//Minimum Window Substring
+class Solution {
+public:
+    string minWindow(string s, string t) {
+        int n = s.length();
+        unordered_map<char,int> pat,mp;
+        int cnt = 0;
+        for(char ch : t){
+            pat[ch]++;
+            if(pat[ch] == 1)cnt++;
+        }
+        int mnlen = INT_MAX;
+        int i=0,j=0;
+        int strt_idx = -1;
+        while(j<n){
+            mp[s[j]]++;
+            if(mp[s[j]] == pat[s[j]]){
+                cnt--;
+            }
+            while(cnt == 0){
+                if(j-i+1 < mnlen){
+                    mnlen = j-i+1;
+                    strt_idx = i;
+                }
+                mp[s[i]]--;
+                if(mp[s[i]] < pat[s[i]]){
+                    cnt++;
+                }
+                i++;
+            }
+            j++;
+        }
+        if(mnlen == INT_MAX)return "";
+        return s.substr(strt_idx,mnlen);
+    }
+};
+
+//Minimum Window Subsequence
+class Solution {
+public:
+    /**
+     * @param s: a string
+     * @param t: a string
+     * @return: the minimum substring of S
+     */
+    string minWindow(string &s, string &t) {
+        // Write your code here
+        int n = s.length(), m = t.length();
+        vector<vector<int>> dp(n,vector<int>(m,-1));
+        
+        //Here dp(i,j) reprensents the strting idx in s(0,i) of minimum subsequence corresponding to t(0,j)
+        //Initialization
+        for(int i=0;i<n;i++){
+            if(s[i] == t[0]){
+                dp[i][0] = 0;
+            }else{
+                if(i!=0)
+                    dp[i][0] = dp[i-1][0];
+            }
+        }
+
+        //fill up dp
+        for(int i=1;i<n;i++){
+            for(int j=1;j<m;j++){
+                if(s[i] == t[j])
+                    dp[i][j] = dp[i-1][j-1];
+                else
+                    dp[i][j] = dp[i-1][j];
+            }
+        }
+
+        //finding that subseq 
+        int strting_idx = -1, len = INT_MAX;
+        for(int i=0;i<n;i++){
+            int idx = dp[i][m-1];
+            if(idx != -1){
+                int curlen = i-idx+1;
+                if(curlen < len){
+                    strting_idx = idx;
+                    len = curlen;
+                }
+            }
+        }
+        if(len == INT_MAX)return "";
+        return s.substr(strting_idx, len);
+    }
+};
+
